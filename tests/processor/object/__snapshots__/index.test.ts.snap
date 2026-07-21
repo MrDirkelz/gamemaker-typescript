@@ -7,7 +7,7 @@ exports[`processObjectFile() > obj_example_1 1`] = `
   "extendedClassName": "GMObject",
   "scripts": [
     {
-      "code": "move_player(self); // move_player is external script
+      "code": "move_player(self);
 ",
       "scriptName": "onStep",
     },
@@ -15,18 +15,12 @@ exports[`processObjectFile() > obj_example_1 1`] = `
       "code": "var _xx = self.x;
 var _yy = self.y - 40;
 var x = self.x;
-// Draw Shadow
 draw_set_color(c_black);
 draw_text(_xx + 2, _yy + 2, self.name);
-// Draw Main Text
 draw_set_color(c_white);
 draw_text(_xx, _yy, self.name);
 ",
       "scriptName": "onDrawGui",
-    },
-    {
-      "code": "event_inherited();",
-      "scriptName": "onCreate",
     },
   ],
 }
@@ -53,7 +47,7 @@ self.hitCount += 1;
   "extendedClassName": "GMObject",
   "scripts": [
     {
-      "code": "event_inherited();
+      "code": "self.hitCount = 0;
 
 self.hitCount = 0;
 ",
@@ -70,9 +64,7 @@ exports[`processObjectFile() > should correctly parse a class name and its metho
   "extendedClassName": "GMObject",
   "scripts": [
     {
-      "code": "event_inherited();
-
-self.movement_speed = 3;
+      "code": "self.movement_speed = 3;
 ",
       "scriptName": "onCreate",
     },
@@ -94,18 +86,15 @@ move = function (dx, dy) {
     __super_Player_move(dx, dy);
 };
 
-
 __super_Player_say_hi = say_hi;
 say_hi = function () {
     __super_Player_say_hi();
 };
 
-
 __super_Player_mind_own_biz = mind_own_biz;
 mind_own_biz = function () {
     self.sprite_index = spr_mind_own_biz;
-};
-",
+};",
       "scriptName": "onCreate",
     },
   ],
@@ -119,13 +108,9 @@ exports[`processObjectFile() > should handle methods within a class 1`] = `
   "extendedClassName": "GMObject",
   "scripts": [
     {
-      "code": "event_inherited();
-// Object methods from TestObject
-changeSpeed = function (speed) {
+      "code": "changeSpeed = function (speed) {
     self.movement_speed = speed;
 };
-
-// End object methods
 
 self.movement_speed = 3;
 ",
@@ -142,12 +127,9 @@ exports[`processObjectFile() > should handle methods within a class without onCr
   "extendedClassName": "GMObject",
   "scripts": [
     {
-      "code": "event_inherited();
-
-changeSpeed = function (speed) {
+      "code": "changeSpeed = function (speed) {
     self.movement_speed = speed;
-};
-",
+};",
       "scriptName": "onCreate",
     },
   ],

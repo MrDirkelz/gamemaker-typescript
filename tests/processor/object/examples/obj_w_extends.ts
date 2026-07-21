@@ -1,4 +1,3 @@
-// @ts-nocheck
 class Player extends Entity {
   move (dx: number, dy: number) {
     super.move(dx, dy);

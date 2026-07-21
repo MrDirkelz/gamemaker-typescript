@@ -1,4 +1,3 @@
-// @ts-nocheck
 class Base extends GMObject {
   name: string;
 

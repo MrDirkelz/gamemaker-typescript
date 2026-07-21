@@ -1,4 +1,3 @@
-// @ts-nocheck
 class Entity {
   name: string;
 
@@ -32,6 +31,7 @@ class PlayerTwo extends EntityTwo {
   name: string;
 
   constructor(_name: string) {
+    super();
     this.name = _name;
   }
 

@@ -1,4 +1,3 @@
-// @ts-nocheck
 class TestObject extends GMObject {
   movement_speed: number;
 

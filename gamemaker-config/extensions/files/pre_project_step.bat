@@ -5,18 +5,25 @@ cd /d "%YYprojectDir%"
 
 echo [GameMaker_Typescript] Starting TypeScript compilation...
 
-:: Check if gmts is installed
+:: Prefer the project-local compiler so builds use the pinned version.
+if exist "%YYprojectDir%\node_modules\.bin\gmts.cmd" (
+    call "%YYprojectDir%\node_modules\.bin\gmts.cmd" compile
+    if errorlevel 1 exit /b 1
+    exit /b 0
+)
+
+:: Fall back to a global compiler.
 where gmts >nul 2>nul
-if %errorlevel% neq 0 (
-    echo [ERROR] gmts CLI not found. Please run: npm i -g gmts
+if errorlevel 1 (
+    echo [ERROR] gmts CLI not found. Install @odemian/gamemaker-typescript locally or globally.
     exit /b 1
 )
 
 :: Run the compilation
 call gmts compile
 
-if %errorlevel% neq 0 (
-    echo [GameMaker_Typescript] ERROR: GameMaker_Typescript is not installed
+if errorlevel 1 (
+    echo [GameMaker_Typescript] ERROR: TypeScript validation or compilation failed
     exit /b 1
 )
 
