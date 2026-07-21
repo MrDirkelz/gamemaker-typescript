@@ -13,6 +13,11 @@ cd "$YYprojectDir"
 echo "[GameMaker_Typescript] Starting TypeScript compilation..."
 
 find_gmts() {
+    if [ -x "$YYprojectDir/node_modules/.bin/gmts" ]; then
+        echo "$YYprojectDir/node_modules/.bin/gmts"
+        return 0
+    fi
+
     if command -v gmts >/dev/null 2>&1; then
         command -v gmts
         return 0
@@ -43,14 +48,14 @@ find_gmts() {
 GMTS_BIN=$(find_gmts)
 
 if [ -z "$GMTS_BIN" ]; then
-    echo "[ERROR] gmts CLI not found. Please run: npm i -g gmts"
+    echo "[ERROR] gmts CLI not found. Install @odemian/gamemaker-typescript locally or globally."
     exit 1
 fi
 
 "$GMTS_BIN" compile
 
 if [ $? -ne 0 ]; then
-    echo "[GameMaker_Typescript] ERROR: GameMaker_Typescript is not installed"
+    echo "[GameMaker_Typescript] ERROR: TypeScript validation or compilation failed"
     exit 1
 fi
 

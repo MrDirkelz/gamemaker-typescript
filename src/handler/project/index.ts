@@ -1,8 +1,6 @@
 import fs from "fs-extra";
 import {createProjectFolder, IProject, IProjectResource} from "../../entities/project";
 import js5 from "json5";
-import {createObjectHandler, IObjectHandler} from "../object";
-import {createScriptHandler, IScriptHandler} from "../script";
 import {MIN_REQUIRED_IDE_VERSION} from "../../const";
 import {isVersionHigher} from "../../utils/version";
 
@@ -28,10 +26,7 @@ export interface IProjectHandler {
   flush (reload?: boolean): void;
   addResource (name: string, path: string): IProjectResource;
   addFolder (name: string): void;
-  getObjectHandler (name: string): IObjectHandler;
-  getScriptHandler (name: string): IScriptHandler;
   iterateResources (cb: (res: IProjectResource) => void): void;
-  getResource(type: 'scripts' | 'objects', name: string): IProjectResource | undefined;
   isCompatible(): boolean;
   version(): string;
 }
@@ -57,27 +52,10 @@ export const createProjectHandler = (): IProjectHandler => {
       return project.MetaData.IDEVersion;
     },
 
-    getObjectHandler (name: string) {
-      return createObjectHandler(this, name);
-    },
-
-    getScriptHandler (name: string) {
-      return createScriptHandler(this, name);
-    },
-
     iterateResources (cb: (res: IProjectResource) => void) {
       project.resources.forEach(cb);
     },
 
-    getResource(type, name): IProjectResource | undefined {
-      for (const res of project.resources) {
-        if (res.id.name === name && res.id.path.startsWith(type)) {
-          return res;
-        }
-      }
-
-      return undefined;
-    },
     addResource (name: string, path: string): IProjectResource {
       // check if resource exists
       const res = project.resources.find(resource => {
@@ -85,6 +63,8 @@ export const createProjectHandler = (): IProjectHandler => {
       });
 
       if (res) {
+        // Setup may be migrating an older absolute extension path.
+        res.id.path = path;
         return res;
       }
 

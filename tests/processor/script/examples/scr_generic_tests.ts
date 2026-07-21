@@ -1,4 +1,3 @@
-// @ts-nocheck
 function test2 (i: number = 2, j = "hello") {
   return i == j;
 }

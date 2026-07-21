@@ -1,9 +1,23 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
+exports[`processScriptFile() > emits GML-safe enums, templates, typeof, and null 1`] = `
+{
+  "code": "enum State {
+    Idle = 0,
+    Run = 4,
+    Jump = 5
+}
+function describe(value) {
+    var empty = pointer_null;
+    return "" + typeof(value) + ":" + State.Jump + ":" + empty;
+}
+",
+}
+`;
+
 exports[`processScriptFile() > should correctly parse a script 1`] = `
 {
-  "code": "// @ts-nocheck
-function test() {
+  "code": "function test() {
     show_debug_message("Test");
 }
 ",
@@ -12,8 +26,7 @@ function test() {
 
 exports[`processScriptFile() > should correctly parse a script when arguments have default values 1`] = `
 {
-  "code": "// @ts-nocheck
-function test(i = 2, j = "hello") {
+  "code": "function test(i = 2, j = "hello") {
     return i == j;
 }
 ",
@@ -22,8 +35,7 @@ function test(i = 2, j = "hello") {
 
 exports[`processScriptFile() > should correctly parse a script where functions have arguments 1`] = `
 {
-  "code": "// @ts-nocheck
-function test(i, j) {
+  "code": "function test(i, j) {
     return i == j;
 }
 ",
@@ -32,8 +44,7 @@ function test(i, j) {
 
 exports[`processScriptFile() > should correctly parse a script with a bunch of stuff in it 1`] = `
 {
-  "code": "// @ts-nocheck
-function test2(i = 2, j = "hello") {
+  "code": "function test2(i = 2, j = "hello") {
     return i == j;
 }
 function test3(i = 2, j = "hello") {
@@ -54,16 +65,16 @@ function test4() {
 exports[`processScriptFile() > should correctly parse a script with a class 1`] = `
 {
   "code": "function Player(_name) constructor {
-    self.name = _name;
     static sayHi = function () {
         show_debug_message(self.name);
     };
+    self.name = _name;
 }
 function PlayerMultipleArgs(_name, _num) constructor {
-    self.name = _name;
     static sayHi = function () {
         show_debug_message(self.name);
     };
+    self.name = _name;
 }
 function PlayerNoArgs() constructor {
     static sayHi = function () {
@@ -76,10 +87,10 @@ function PlayerNoArgsTwo() constructor {
     };
 }
 function PlayerNoArgsThree() constructor {
-    self.name = "Ciaone";
     static sayHi = function () {
         show_debug_message("Hi " + self.name);
     };
+    self.name = "Ciaone";
 }
 ",
 }
@@ -88,10 +99,10 @@ function PlayerNoArgsThree() constructor {
 exports[`processScriptFile() > should correctly parse a script with a class and inheritance 1`] = `
 {
   "code": "function Entity(_name) constructor {
-    self.name = _name;
     static sayHi = function () {
         show_debug_message(self.name);
     };
+    self.name = _name;
 }
 function Player(name) : Entity(name) constructor {
     static __super_Player_sayHi = sayHi;
@@ -106,11 +117,11 @@ function EntityTwo() constructor {
     };
 }
 function PlayerTwo(_name) : EntityTwo() constructor {
-    self.name = _name;
     static __super_PlayerTwo_sayHi = sayHi;
     static sayHi = function () {
         __super_PlayerTwo_sayHi(self.name);
     };
+    self.name = _name;
 }
 function EntityThree() constructor {
     static sayHi = function (_name) {
@@ -129,8 +140,7 @@ function PlayerThree() : EntityThree() constructor {
 
 exports[`processScriptFile() > should correctly parse a script with const and let declarations 1`] = `
 {
-  "code": "// @ts-nocheck
-function test() {
+  "code": "function test() {
     var a = 2, b = 5;
     var c = 2, d = 5;
     var s = 1;

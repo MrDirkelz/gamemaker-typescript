@@ -48,4 +48,9 @@ describe('processScriptFile()', () => {
     const result = processExampleScrFile("scr_class_inheritance");
     expect(result).toMatchSnapshot();
   });
+
+  it('emits GML-safe enums, templates, typeof, and null', () => {
+    const result = processExampleScrFile("scr_gml_transforms");
+    expect(result).toMatchSnapshot();
+  });
 });

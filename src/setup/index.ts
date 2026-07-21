@@ -1,7 +1,7 @@
 import fs from "fs-extra";
 import path from "node:path";
 import {createExtension, createExtensionFile} from "../entities/extension";
-import {DEFAULT_EXTENSIONS_FOLDER, MIN_REQUIRED_IDE_VERSION} from "../const";
+import {DEFAULT_EXTENSIONS_FOLDER, MIN_REQUIRED_IDE_VERSION, TARGET_RUNTIME_VERSION} from "../const";
 import {createProjectHandler} from "../handler/project";
 import {logColors} from "../utils/logColors";
 
@@ -26,7 +26,8 @@ const setupExtension = (props: ISetupProjectProps) => {
     ],
   });
 
-  const metaFilePath = path.join(props.currentFolder, "extensions", extName, extName + ".yy");
+  const metaRelativePath = path.join("extensions", extName, extName + ".yy");
+  const metaFilePath = path.join(props.currentFolder, metaRelativePath);
 
   // copy compilation trigger script
   fs.outputFileSync(
@@ -46,7 +47,7 @@ const setupExtension = (props: ISetupProjectProps) => {
   );
 
   projectHandler.addFolder(DEFAULT_EXTENSIONS_FOLDER);
-  projectHandler.addResource(extName, metaFilePath);
+  projectHandler.addResource(extName, metaRelativePath.split(path.sep).join("/"));
   projectHandler.flush();
 };
 
@@ -61,33 +62,24 @@ export const setupTsProject = (props: ISetupProjectProps) => {
     return;
   }
 
-  if (!props.forceSetup) {
-    try {
-      const tsConfig = fs.readFileSync(path.join(props.currentFolder, "tsconfig.json"), "utf8");
-      if (tsConfig) {
-        console.log("Setup already done");
-        return;
-      }
-    } catch (e) {
-      // empty project, proceed
-    }
-  }
-
   const newTsConfig = fs.readJsonSync(path.join(props.librarySourceRoot, "gamemaker-config", "tsconfig.json"), "utf8");
-  newTsConfig.compilerOptions.typeRoots = [
-    path.join(props.librarySourceRoot, "gamemaker-config", ".ts"),
-  ];
-  newTsConfig.include = [
-    path.join(".", ".ts", "**", "*.d.ts"), // generated types
-    path.join(".", "global.d.ts"), // user defined globals
-    path.join("**", "*.ts"), // code
-  ];
-
-  // copy files
-  fs.outputJsonSync(path.join(props.currentFolder, "tsconfig.json"), newTsConfig, {
+  const gmtsConfigPath = path.join(props.currentFolder, "tsconfig.gmts.json");
+  if (props.forceSetup || !fs.existsSync(gmtsConfigPath)) fs.outputJsonSync(gmtsConfigPath, newTsConfig, {
     encoding: "utf8",
     spaces: 2,
   });
 
+  const projectTypes = path.join(props.currentFolder, ".gmts", "types", `lts-${TARGET_RUNTIME_VERSION}`);
+  fs.emptyDirSync(projectTypes);
+  fs.copySync(path.join(props.librarySourceRoot, "gamemaker-config", ".ts", "static"), projectTypes, { overwrite: true });
+
+  const rootConfigPath = path.join(props.currentFolder, "tsconfig.json");
+  if (!fs.existsSync(rootConfigPath)) {
+    fs.outputJsonSync(rootConfigPath, { extends: "./tsconfig.gmts.json" }, { encoding: "utf8", spaces: 2 });
+  } else {
+    console.log("Preserved existing tsconfig.json; use tsconfig.gmts.json for GameMaker TypeScript.");
+  }
+
   setupExtension(props);
+  console.log("GameMaker TypeScript LTS 2026 setup complete.");
 };

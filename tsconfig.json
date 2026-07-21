@@ -3,7 +3,7 @@
     /* Standards */
     "target": "ES2022",
     "module": "NodeNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "NodeNext",
     "lib": ["ES2022"],
 
     /* Build Output (For Types Only) */
@@ -13,7 +13,7 @@
     /* Strictness & Interop */
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
+    "skipLibCheck": false,
     "forceConsistentCasingInFileNames": true,
 
     /* Optimization for esbuild */

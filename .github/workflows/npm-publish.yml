@@ -33,7 +33,24 @@ permissions:
   id-token: write   # REQUIRED for npm Trusted Publishing
 
 jobs:
+  gamemaker-lts-gate:
+    runs-on: [self-hosted, gamemaker-lts-2026]
+    env:
+      GMTS_GAMEMAKER_CLI: ${{ vars.GMTS_GAMEMAKER_CLI }}
+      GMTS_GAMEMAKER_PROJECT: ${{ vars.GMTS_GAMEMAKER_PROJECT }}
+      GMTS_GAMEMAKER_ARGS_JSON: ${{ vars.GMTS_GAMEMAKER_ARGS_JSON }}
+      GMTS_GAMEMAKER_RUNTIME_VERSION: '2026.0.0.23'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: yarn install --frozen-lockfile
+      - name: Compile generated project with licensed GameMaker LTS
+        run: npm run test:gamemaker
+
   publish:
+    needs: gamemaker-lts-gate
     runs-on: ubuntu-latest
 
     steps:
@@ -49,8 +66,8 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build CLI
-        run: yarn build
+      - name: Verify release
+        run: npm run verify
 
       - name: Determine tag and set NPM version
         id: release-meta

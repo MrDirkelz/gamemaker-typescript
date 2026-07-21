@@ -1,15 +1,19 @@
-// @ts-nocheck
+interface Enemy extends GMObject {}
+interface Pickup extends GMObject {}
+
 class CollisionObject extends GMObject {
-  onCreate() {
+  hitCount = 0;
+
+  override onCreate() {
     this.hitCount = 0;
   }
 
-  onCollision_obj_enemy() {
+  override onCollision_obj_enemy(other: Enemy) {
     instance_destroy();
   }
 
-  onCollision_obj_pickup() {
-    super.onCollision_obj_pickup();
+  override onCollision_obj_pickup(other: Pickup) {
+    super.onCollision_obj_pickup(other);
     this.hitCount += 1;
   }
 }

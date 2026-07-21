@@ -1,12 +1,12 @@
 import ts from "typescript";
 import {
-  eventByHandler,
+  resolveObjectEvent,
   getCollisionTargetName,
   isCollisionHandler,
   OnCreateHandler,
 } from "../../events";
-import {createObjectTranspilerConfig} from "../../config/transpiler";
 import {readFileSync} from "../../utils/files";
+import {emitTypeScriptFragment} from "../../compiler/emitter";
 
 interface ICollectedObject {
   scripts: { scriptName: string; code: string }[];
@@ -65,12 +65,23 @@ export function processObjectFile(
     result.className = statement.name.text;
 
     for (const member of statement.members) {
-      if (!ts.isMethodDeclaration(member) || !ts.isIdentifier(member.name)) continue;
+      if (ts.isPropertyDeclaration(member) && ts.isIdentifier(member.name) && member.initializer) {
+        const initializer = printer.printNode(ts.EmitHint.Expression, member.initializer, sourceFile);
+        preCreateScripts.push(emitTypeScriptFragment(
+          `self.${member.name.text} = ${initializer};`,
+          { filename: filePath, mode: "object", className: result.className },
+        ));
+        continue;
+      }
+      if (!ts.isMethodDeclaration(member) || !ts.isIdentifier(member.name) || !member.body) continue;
 
       const methodName = member.name.text;
-      const transpilerConfig = createObjectTranspilerConfig({
+      const emitOptions = {
+        filename: filePath,
+        mode: "object" as const,
         className: result.className,
-      });
+        currentMethod: methodName,
+      };
 
       const bodyStatements = member.body?.statements ?? [];
       const bodyCode = bodyStatements
@@ -88,12 +99,12 @@ export function processObjectFile(
         result.collisionScripts.push({
           scriptName: methodName,
           targetObjectName,
-          code: ts.transpileModule(bodyCode, transpilerConfig).outputText,
+          code: `${emitTypeScriptFragment(bodyCode, emitOptions)}\n`,
         });
-      } else if (eventByHandler.has(methodName)) {
+      } else if (resolveObjectEvent(methodName)) {
         result.scripts.push({
           scriptName: methodName,
-          code: ts.transpileModule(bodyCode, transpilerConfig).outputText,
+          code: `${emitTypeScriptFragment(bodyCode, emitOptions)}\n`,
         });
       } else {
         const params = member.parameters
@@ -118,50 +129,31 @@ export function processObjectFile(
           result.extendedClassName === "GMObject" ? "" : `__super_${result.className}_${methodName} = ${methodName};`,
           `${methodName} = function(${params}) {\n${bodyCode}}`,
         ].join("\n");
-        preCreateScripts.push(
-          ts.transpileModule(methodDefinition, transpilerConfig).outputText
-        );
+        preCreateScripts.push(emitTypeScriptFragment(methodDefinition, {
+          filename: filePath,
+          mode: "object",
+          className: result.className,
+        }));
       }
     }
 
     break; // only compile first class
   }
 
-  /**
-   * SPAGHETTI CODE SECTION
-   * might fix at some point, maybe not, will see. If it ain't broken don't fix it
-   */
   const onCreateScript = result.scripts.find((scr) => scr.scriptName === OnCreateHandler);
-
-  if (preCreateScripts.length > 0) {
-    const pre = preCreateScripts.join("\n\n");
-
-    if (onCreateScript) {
-      onCreateScript.code = [
-        `event_inherited();`, // always call event_inherited() when onCreate
-        `// Object methods from ${result.className}`,
-        pre,
-        "// End object methods\n",
-        onCreateScript.code,
-      ].join("\n");
-    } else {
-      result.scripts.push({
-        scriptName: OnCreateHandler,
-        code: `event_inherited();\n\n${pre}`,
-      });
-    }
-  } else {
-    if (onCreateScript) {
-      onCreateScript.code = [
-        "event_inherited();", // onCreate event_inherited alwasy first!
-        onCreateScript.code.replace("event_inherited();", ""), // remove event_inherited(); if present
-      ].join("\n\n");
-    } else {
-      result.scripts.push({
-        scriptName: OnCreateHandler,
-        code: `event_inherited();`,
-      });
-    }
+  const prelude = preCreateScripts.join("\n\n");
+  const hasGameMakerParent = Boolean(result.extendedClassName && result.extendedClassName !== "GMObject");
+  if (onCreateScript) {
+    // An explicit onCreate is a real override. Parent behavior occurs only at
+    // the source-level super.onCreate() call, which the emitter lowers once.
+    onCreateScript.code = [prelude, onCreateScript.code].filter(Boolean).join("\n\n");
+  } else if (prelude) {
+    // Generating Create solely for fields/helpers would otherwise hide the
+    // parent event. Preserve GameMaker's natural inherited behavior.
+    result.scripts.push({
+      scriptName: OnCreateHandler,
+      code: [hasGameMakerParent ? "event_inherited();" : "", prelude].filter(Boolean).join("\n\n"),
+    });
   }
 
   return result;

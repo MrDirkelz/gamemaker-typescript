@@ -1,4 +1,3 @@
-// @ts-nocheck
 function test () {
   const a = 2, b = 5;
   let c = 2, d = 5;

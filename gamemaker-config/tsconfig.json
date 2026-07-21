@@ -1,13 +1,25 @@
 {
   "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "noLib": true,
-    "skipLibCheck": true,
-    "rootDir": ".",
-    "typeRoots": [
-      ".ts"
-    ],
-    "types": ["static"],
+    "strict": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "skipLibCheck": false,
     "strictPropertyInitialization": false,
-    "preserveConstEnums": false
-  }
+    "useDefineForClassFields": false,
+    "noEmit": true
+  },
+  "files": [
+    ".gmts/types/lts-2026.0.0.23/index.d.ts"
+  ],
+  "include": [
+    ".gmts/generated/**/*.d.ts",
+    "global.d.ts",
+    "objects/**/*.ts",
+    "scripts/**/*.ts"
+  ]
 }

@@ -37,6 +37,8 @@ describe('processObjectFile()', () => {
   it('should collect collision event handlers separately', () => {
     const result = processExampleObjFile("obj_w_collision");
     expect(result).toMatchSnapshot();
+    expect(result?.collisionScripts[1].code).toContain("event_inherited();");
+    expect(result?.collisionScripts[1].code).not.toContain("event_inherited(other)");
   });
 
   it('should reject collision handlers for unknown target objects', () => {

@@ -16,6 +16,6 @@ export const isVersionHigher = (current: string, minimum: string): boolean => {
     // If they are equal, continue to the next segment
   }
 
-  // If the loop finishes, the versions are identical
-  return false;
+  // The minimum itself is supported.
+  return true;
 }
